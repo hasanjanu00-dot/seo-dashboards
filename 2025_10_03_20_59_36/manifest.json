@@ -1,0 +1,41 @@
+[
+  {
+    "url": "https://blixa.webflow.io/",
+    "isRepresentativeRun": false,
+    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/2025_10_03_20_59_36/blixa_webflow_io-_-2025_10_03_20_59_47.report.html",
+    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/2025_10_03_20_59_36/blixa_webflow_io-_-2025_10_03_20_59_47.report.json",
+    "summary": {
+      "performance": 0.71,
+      "accessibility": null,
+      "best-practices": 1,
+      "seo": 0.92,
+      "pwa": 0.4
+    }
+  },
+  {
+    "url": "https://blixa.webflow.io/",
+    "isRepresentativeRun": false,
+    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/2025_10_03_20_59_36/blixa_webflow_io-_-2025_10_03_20_59_59.report.html",
+    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/2025_10_03_20_59_36/blixa_webflow_io-_-2025_10_03_20_59_59.report.json",
+    "summary": {
+      "performance": 0.94,
+      "accessibility": null,
+      "best-practices": 1,
+      "seo": 0.92,
+      "pwa": 0.4
+    }
+  },
+  {
+    "url": "https://blixa.webflow.io/",
+    "isRepresentativeRun": true,
+    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/2025_10_03_20_59_36/blixa_webflow_io-_-2025_10_03_21_00_09.report.html",
+    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/2025_10_03_20_59_36/blixa_webflow_io-_-2025_10_03_21_00_09.report.json",
+    "summary": {
+      "performance": 0.94,
+      "accessibility": null,
+      "best-practices": 1,
+      "seo": 0.92,
+      "pwa": 0.4
+    }
+  }
+]
