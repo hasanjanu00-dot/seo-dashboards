@@ -1,125 +1,15 @@
-name: Lighthouse CI
+name: LHCI Syntax Test
 
 on:
-  schedule:
-    - cron: '0 */6 * * *'
   workflow_dispatch:
 
 jobs:
-  lhci:
+  test:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-
-      - name: Install Lighthouse CI
-        run: npm install -g @lhci/cli@0.10.x
-        shell: bash
-
-      - name: Run Lighthouse CI autorun
-        shell: bash
+      - name: Basic echo (syntax test)
         run: |
-          set -euo pipefail
-          TIMESTAMP=$(date +'%Y_%m_%d_%H_%M_%S')
-          REPORT_DIR=lhci-report/${TIMESTAMP}
-          mkdir -p "$REPORT_DIR"
-          echo "Running LHCI; output -> $REPORT_DIR"
-          lhci autorun \
-            --collect.url=https://blixa.webflow.io \
-            --upload.target=filesystem \
-            --upload.outputDir="$REPORT_DIR"
-
-      - name: Debug: list generated files
-        shell: bash
-        run: |
-          echo "=== lhci-report top-level ==="
-          ls -la lhci-report || true
-          echo "=== recursive listing (depth 4) ==="
-          find lhci-report -maxdepth 4 -type f -print || true
-
-      - name: Create dashboard + per-run index.html files
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          mkdir -p lhci-report
-
-          # create main dashboard
-          DASH=lhci-report/index.html
-          printf '%s\n' '<!DOCTYPE html>' '<html>' '<head><meta charset="utf-8"><title>Lighthouse Reports</title></head>' '<body>' '<h1>Lighthouse Reports Dashboard</h1>' '<p><a href="./latest/index.html">Latest report</a></p>' '<ul>' > "$DASH"
-
-          # iterate run folders
-          for folderpath in lhci-report/*/; do
-            [ -d "$folderpath" ] || continue
-            folder=$(basename "$folderpath")
-            echo "Processing $folder"
-
-            # create per-run index file
-            RUN_INDEX="${folderpath}index.html"
-            printf '%s\n' '<!DOCTYPE html>' '<html>' '<head><meta charset="utf-8"><title>Reports for '"$folder"'</title></head>' '<body>' '<h1>Reports for '"$folder"'</h1>' '<p><a href="../index.html">Back to dashboard</a></p>' '<ul>' > "$RUN_INDEX"
-
-            found=false
-            for h in "${folderpath}"*.html; do
-              [ -f "$h" ] || continue
-              base=$(basename "$h")
-              if [ "$base" = "index.html" ]; then
-                continue
-              fi
-              found=true
-              printf '  <li><a href="%s">%s</a></li>\n' "$base" "$base" >> "$RUN_INDEX"
-            done
-
-            if [ "$found" = false ]; then
-              printf '  <li>No HTML reports found in this folder.</li>\n' >> "$RUN_INDEX"
-            fi
-
-            printf '%s\n' '</ul>' '</body>' '</html>' >> "$RUN_INDEX"
-
-            # make HTML asset URLs relative inside this run folder (best-effort)
-            find "$folderpath" -type f -name "*.html" -print0 | xargs -0 -n1 sed -i 's/href=\"\//href=\".\//g; s/src=\"\//src=\".\//g; s/url(\"\//url(\".\//g; s/url('\''\//url('\''.\//g' || true
-
-            # add link to main dashboard
-            printf '  <li><a href="%s/index.html">%s</a></li>\n' "$folder" "$folder" >> "$DASH"
-          done
-
-          printf '%s\n' '</ul>' '</body>' '</html>' >> "$DASH"
-
-      - name: Copy newest run to 'latest' (stable URL)
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -rf lhci-report/latest || true
-          newest=$(ls -1d lhci-report/*/ 2>/dev/null | sort -r | head -n1 || true)
-          if [ -n "$newest" ]; then
-            mkdir -p lhci-report/latest
-            cp -R "${newest}"* lhci-report/latest/
-            if [ ! -f lhci-report/latest/index.html ] && [ -f "${newest}index.html" ]; then
-              cp "${newest}index.html" lhci-report/latest/index.html
-            fi
-            echo "Copied newest run (${newest}) to lhci-report/latest/"
-          else
-            echo "No run folders found; latest not created."
-          fi
-
-      - name: Final debug listing before deploy
-        shell: bash
-        run: |
-          echo "=== final lhci-report tree ==="
-          find lhci-report -type f -maxdepth 5 -print || true
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./lhci-report
-          publish_branch: gh-pages
-          allow_empty_commit: true
-          user_name: "github-actions[bot]"
-          user_email: "github-actions[bot]@users.noreply.github.com"
+          echo "YAML and Actions syntax OK"
