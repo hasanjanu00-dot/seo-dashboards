@@ -2,11 +2,8 @@ name: Lighthouse CI
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Runs every Sunday at 00:00 UTC
-  push:
-    branches:
-      - main           # Optional: also run on push to main
-  workflow_dispatch:    # Allows manual trigger
+    - cron: '0 */6 * * *'  # every 6 hours
+  workflow_dispatch:
 
 jobs:
   lhci:
@@ -16,37 +13,44 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install Node.js
+      - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Install Lighthouse CI
-        run: npm install -g @lhci/cli
+        run: npm install -g @lhci/cli@0.10.x
 
-      - name: Run Lighthouse CI
+      - name: Run Lighthouse CI autorun
         run: |
-          mkdir -p ./lhci_reports
+          # Create a timestamped folder for this run
           TIMESTAMP=$(date +'%Y_%m_%d_%H_%M_%S')
-          REPORT_FILE="blixa_webflow_io--$TIMESTAMP.report.html"
-          lhci collect --url=https://blixa.webflow.io --output-path=./lhci_reports/$REPORT_FILE --json
+          REPORT_DIR="./lhci-report/$TIMESTAMP"
+          mkdir -p $REPORT_DIR
 
-      - name: Generate index.html dashboard
+          # Run Lighthouse CI and output HTML report
+          lhci autorun \
+            --collect.url=https://blixa.webflow.io \
+            --upload.target=filesystem \
+            --upload.outputDir=$REPORT_DIR
+
+      - name: Update index.html dashboard
         run: |
-          echo "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Lighthouse Reports</title></head><body>" > ./lhci_reports/index.html
-          echo "<h1>Lighthouse Reports</h1><ul>" >> ./lhci_reports/index.html
-          for f in ./lhci_reports/*.html; do
-            file=$(basename $f)
-            if [ "$file" != "index.html" ]; then
-              echo "<li><a href=\"$file\">$file</a></li>" >> ./lhci_reports/index.html
-            fi
-          done
-          echo "</ul></body></html>" >> ./lhci_reports/index.html
+          DASHBOARD="./lhci-report/index.html"
+          echo "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Lighthouse Reports</title></head><body>" > $DASHBOARD
+          echo "<h1>Lighthouse Reports Dashboard</h1><ul>" >> $DASHBOARD
 
+          # Loop through all timestamped report folders
+          for f in ./lhci-report/*/index.html; do
+            folder=$(basename $(dirname $f))
+            echo "<li><a href=\"$folder/index.html\">$folder</a></li>" >> $DASHBOARD
+          done
+
+          echo "</ul></body></html>" >> $DASHBOARD
 
       - name: Deploy reports to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v7
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./lhci_reports
+          publish_dir: ./lhci-report
           publish_branch: gh-pages
