@@ -1,0 +1,12 @@
+{
+  "ci": {
+    "collect": {
+      "url": ["https://blixa.webflow.io/"],
+      "numberOfRuns": 3
+    },
+    "upload": {
+      "target": "filesystem",
+      "outputDir": "./lhci_reports"
+    }
+  }
+}
