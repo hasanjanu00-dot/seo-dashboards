@@ -2,28 +2,48 @@ name: Lighthouse CI
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Runs every Sunday at midnight UTC
-  workflow_dispatch:      # Allows manual trigger in GitHub Actions
+    - cron: '0 */6 * * *'  # Runs every Sunday at 00:00 UTC
+  push:
+    branches:
+      - main           # Optional: also run on push to main
+  workflow_dispatch:    # Allows manual trigger
 
 jobs:
-  lighthouse:
+  lhci:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
 
-      - name: Install Node
-        uses: actions/setup-node@v2
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
         with:
           node-version: '18'
 
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli
 
-      - name: Run Lighthouse
-        run: lhci collect --config=lighthouserc.json && lhci upload --target=filesystem --outputDir=./lhci_reports
+      - name: Run Lighthouse CI
+        run: |
+          mkdir -p ./lhci_reports
+          TIMESTAMP=$(date +'%Y_%m_%d_%H_%M_%S')
+          REPORT_FILE="blixa_webflow_io--$TIMESTAMP.report.html"
+          lhci collect --url=https://blixa.webflow.io --output-path=./lhci_reports/$REPORT_FILE --json
 
-      - name: Deploy to GitHub Pages
+      - name: Generate index.html dashboard
+        run: |
+          echo "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Lighthouse Reports</title></head><body>" > ./lhci_reports/index.html
+          echo "<h1>Lighthouse Reports</h1><ul>" >> ./lhci_reports/index.html
+          for f in ./lhci_reports/*.html; do
+            file=$(basename $f)
+            echo "<li><a href=\"$file\">$file</a></li>" >> ./lhci_reports/index.html
+          done
+          echo "</ul></body></html>" >> ./lhci_reports/index.html
+
+      - name: Deploy reports to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./lhci_reports
+          publish_branch: gh-pages
