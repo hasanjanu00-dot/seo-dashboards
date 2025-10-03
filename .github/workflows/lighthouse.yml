@@ -2,7 +2,7 @@ name: Lighthouse CI
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # every 6 hours
+    - cron: '0 */6 * * *'
   workflow_dispatch:
 
 jobs:
@@ -27,18 +27,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-
           TIMESTAMP=$(date +'%Y_%m_%d_%H_%M_%S')
           REPORT_DIR=lhci-report/${TIMESTAMP}
           mkdir -p "$REPORT_DIR"
-
-          echo "Running LHCI autorun; output will be placed in: $REPORT_DIR"
+          echo "Running LHCI; output -> $REPORT_DIR"
           lhci autorun \
             --collect.url=https://blixa.webflow.io \
             --upload.target=filesystem \
             --upload.outputDir="$REPORT_DIR"
 
-      - name: Debug: show generated files (for logs)
+      - name: Debug: list generated files
         shell: bash
         run: |
           echo "=== lhci-report top-level ==="
@@ -46,47 +44,26 @@ jobs:
           echo "=== recursive listing (depth 4) ==="
           find lhci-report -maxdepth 4 -type f -print || true
 
-      - name: Update index.html dashboard (create per-run index.html + make paths relative)
+      - name: Create dashboard + per-run index.html files
         shell: bash
         run: |
           set -euo pipefail
-          DASHBOARD=lhci-report/index.html
 
-          echo "Creating main dashboard: $DASHBOARD"
+          mkdir -p lhci-report
 
-          cat > "$DASHBOARD" <<'HTML'
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Lighthouse Reports</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-  </head>
-  <body>
-    <h1>Lighthouse Reports Dashboard</h1>
-    <p><a href="./latest/index.html">Latest report</a></p>
-    <ul>
-HTML
+          # create main dashboard
+          DASH=lhci-report/index.html
+          printf '%s\n' '<!DOCTYPE html>' '<html>' '<head><meta charset="utf-8"><title>Lighthouse Reports</title></head>' '<body>' '<h1>Lighthouse Reports Dashboard</h1>' '<p><a href="./latest/index.html">Latest report</a></p>' '<ul>' > "$DASH"
 
-          for folderpath in lhci-report/*/ ; do
+          # iterate run folders
+          for folderpath in lhci-report/*/; do
             [ -d "$folderpath" ] || continue
             folder=$(basename "$folderpath")
-            echo "Processing run folder: $folder"
+            echo "Processing $folder"
 
+            # create per-run index file
             RUN_INDEX="${folderpath}index.html"
-            cat > "$RUN_INDEX" <<HTML
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Reports for ${folder}</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-  </head>
-  <body>
-    <h1>Reports for ${folder}</h1>
-    <p><a href="../index.html">Back to dashboard</a></p>
-    <ul>
-HTML
+            printf '%s\n' '<!DOCTYPE html>' '<html>' '<head><meta charset="utf-8"><title>Reports for '"$folder"'</title></head>' '<body>' '<h1>Reports for '"$folder"'</h1>' '<p><a href="../index.html">Back to dashboard</a></p>' '<ul>' > "$RUN_INDEX"
 
             found=false
             for h in "${folderpath}"*.html; do
@@ -96,31 +73,25 @@ HTML
                 continue
               fi
               found=true
-              printf '      <li><a href="%s">%s</a></li>\n' "$base" "$base" >> "$RUN_INDEX"
+              printf '  <li><a href="%s">%s</a></li>\n' "$base" "$base" >> "$RUN_INDEX"
             done
 
             if [ "$found" = false ]; then
-              echo "      <li>No HTML reports found in this folder.</li>" >> "$RUN_INDEX"
+              printf '  <li>No HTML reports found in this folder.</li>\n' >> "$RUN_INDEX"
             fi
 
-            echo "    </ul>" >> "$RUN_INDEX"
-            echo "  </body>" >> "$RUN_INDEX"
-            echo "</html>" >> "$RUN_INDEX"
+            printf '%s\n' '</ul>' '</body>' '</html>' >> "$RUN_INDEX"
 
-            # Convert absolute paths to relative inside all HTML in the run folder:
+            # make HTML asset URLs relative inside this run folder (best-effort)
             find "$folderpath" -type f -name "*.html" -print0 | xargs -0 -n1 sed -i 's/href=\"\//href=\".\//g; s/src=\"\//src=\".\//g; s/url(\"\//url(\".\//g; s/url('\''\//url('\''.\//g' || true
 
-            # add run folder link to main dashboard
-            echo "      <li><a href=\"${folder}/index.html\">${folder}</a></li>" >> "$DASHBOARD"
+            # add link to main dashboard
+            printf '  <li><a href="%s/index.html">%s</a></li>\n' "$folder" "$folder" >> "$DASH"
           done
 
-          cat >> "$DASHBOARD" <<'HTML'
-    </ul>
-  </body>
-</html>
-HTML
+          printf '%s\n' '</ul>' '</body>' '</html>' >> "$DASH"
 
-      - name: Copy newest run to 'latest' for stable URL
+      - name: Copy newest run to 'latest' (stable URL)
         shell: bash
         run: |
           set -euo pipefail
@@ -134,16 +105,16 @@ HTML
             fi
             echo "Copied newest run (${newest}) to lhci-report/latest/"
           else
-            echo "No run folders found; 'latest' not created."
+            echo "No run folders found; latest not created."
           fi
 
       - name: Final debug listing before deploy
         shell: bash
         run: |
           echo "=== final lhci-report tree ==="
-          find lhci-report -type f -maxdepth 4 -print || true
+          find lhci-report -type f -maxdepth 5 -print || true
 
-      - name: Deploy reports to GitHub Pages
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
