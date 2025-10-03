@@ -21,12 +21,13 @@ jobs:
 
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli@0.10.x
+        shell: bash
 
       - name: Run Lighthouse CI autorun
+        shell: bash
         run: |
           set -euo pipefail
 
-          # timestamped folder for this run
           TIMESTAMP=$(date +'%Y_%m_%d_%H_%M_%S')
           REPORT_DIR=lhci-report/${TIMESTAMP}
           mkdir -p "$REPORT_DIR"
@@ -38,6 +39,7 @@ jobs:
             --upload.outputDir="$REPORT_DIR"
 
       - name: Debug: show generated files (for logs)
+        shell: bash
         run: |
           echo "=== lhci-report top-level ==="
           ls -la lhci-report || true
@@ -45,11 +47,13 @@ jobs:
           find lhci-report -maxdepth 4 -type f -print || true
 
       - name: Update index.html dashboard (create per-run index.html + make paths relative)
+        shell: bash
         run: |
           set -euo pipefail
           DASHBOARD=lhci-report/index.html
 
           echo "Creating main dashboard: $DASHBOARD"
+
           cat > "$DASHBOARD" <<'HTML'
 <!DOCTYPE html>
 <html>
@@ -64,13 +68,11 @@ jobs:
     <ul>
 HTML
 
-          # iterate run folders
           for folderpath in lhci-report/*/ ; do
             [ -d "$folderpath" ] || continue
             folder=$(basename "$folderpath")
             echo "Processing run folder: $folder"
 
-            # create per-run index.html
             RUN_INDEX="${folderpath}index.html"
             cat > "$RUN_INDEX" <<HTML
 <!DOCTYPE html>
@@ -87,7 +89,6 @@ HTML
 HTML
 
             found=false
-            # list html files in folder (exclude index.html)
             for h in "${folderpath}"*.html; do
               [ -f "$h" ] || continue
               base=$(basename "$h")
@@ -95,7 +96,7 @@ HTML
                 continue
               fi
               found=true
-              echo "      <li><a href=\"${base}\">${base}</a></li>" >> "$RUN_INDEX"
+              printf '      <li><a href="%s">%s</a></li>\n' "$base" "$base" >> "$RUN_INDEX"
             done
 
             if [ "$found" = false ]; then
@@ -107,16 +108,12 @@ HTML
             echo "</html>" >> "$RUN_INDEX"
 
             # Convert absolute paths to relative inside all HTML in the run folder:
-            # change href="/...  -> href="./...
-            # change src="/...   -> src="./...
-            # change url("/...   -> url("./...
             find "$folderpath" -type f -name "*.html" -print0 | xargs -0 -n1 sed -i 's/href=\"\//href=\".\//g; s/src=\"\//src=\".\//g; s/url(\"\//url(\".\//g; s/url('\''\//url('\''.\//g' || true
 
             # add run folder link to main dashboard
             echo "      <li><a href=\"${folder}/index.html\">${folder}</a></li>" >> "$DASHBOARD"
           done
 
-          # finalize dashboard
           cat >> "$DASHBOARD" <<'HTML'
     </ul>
   </body>
@@ -124,15 +121,14 @@ HTML
 HTML
 
       - name: Copy newest run to 'latest' for stable URL
+        shell: bash
         run: |
           set -euo pipefail
           rm -rf lhci-report/latest || true
-          # find newest directory (sorted by name is fine because timestamp format is lexicographically sortable)
           newest=$(ls -1d lhci-report/*/ 2>/dev/null | sort -r | head -n1 || true)
           if [ -n "$newest" ]; then
             mkdir -p lhci-report/latest
             cp -R "${newest}"* lhci-report/latest/
-            # ensure an index.html exists in latest (if not, copy it from run folder's index.html)
             if [ ! -f lhci-report/latest/index.html ] && [ -f "${newest}index.html" ]; then
               cp "${newest}index.html" lhci-report/latest/index.html
             fi
@@ -142,6 +138,7 @@ HTML
           fi
 
       - name: Final debug listing before deploy
+        shell: bash
         run: |
           echo "=== final lhci-report tree ==="
           find lhci-report -type f -maxdepth 4 -print || true
