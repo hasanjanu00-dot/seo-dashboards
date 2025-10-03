@@ -1,0 +1,29 @@
+name: Lighthouse CI
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Runs every Sunday at midnight UTC
+  workflow_dispatch:      # Allows manual trigger in GitHub Actions
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli
+
+      - name: Run Lighthouse
+        run: lhci collect --config=lighthouserc.json && lhci upload --target=filesystem --outputDir=./lhci_reports
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./lhci_reports
