@@ -37,9 +37,12 @@ jobs:
           echo "<h1>Lighthouse Reports</h1><ul>" >> ./lhci_reports/index.html
           for f in ./lhci_reports/*.html; do
             file=$(basename $f)
-            echo "<li><a href=\"$file\">$file</a></li>" >> ./lhci_reports/index.html
+            if [ "$file" != "index.html" ]; then
+              echo "<li><a href=\"$file\">$file</a></li>" >> ./lhci_reports/index.html
+            fi
           done
           echo "</ul></body></html>" >> ./lhci_reports/index.html
+
 
       - name: Deploy reports to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
