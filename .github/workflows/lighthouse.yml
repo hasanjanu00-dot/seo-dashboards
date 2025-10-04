@@ -56,21 +56,21 @@ jobs:
 
           if [ ${#htmlfiles[@]} -eq 0 ]; then
             cat > "${LATEST_DIR}/index.html" <<HTML
-<!doctype html><html><head><meta charset="utf-8"><title>Latest Reports</title></head><body>
-<h1>Latest Reports</h1>
-<p>No HTML report files were found in this folder.</p>
-</body></html>
-HTML
+          <!doctype html><html><head><meta charset="utf-8"><title>Latest Reports</title></head><body>
+          <h1>Latest Reports</h1>
+          <p>No HTML report files were found in this folder.</p>
+          </body></html>
+          HTML
           else
             first=${htmlfiles[0]}
             cat > "${LATEST_DIR}/index.html" <<HTML
-<!doctype html><html><head><meta charset="utf-8"><title>Latest Reports</title>
-<!-- Auto-redirect to first report -->
-<meta http-equiv="refresh" content="0;url=${first}">
-</head><body>
-<h1>Latest Reports</h1>
-<ul>
-HTML
+          <!doctype html><html><head><meta charset="utf-8"><title>Latest Reports</title>
+          <!-- Auto-redirect to first report -->
+          <meta http-equiv="refresh" content="0;url=${first}">
+          </head><body>
+          <h1>Latest Reports</h1>
+          <ul>
+          HTML
             for f in "${htmlfiles[@]}"; do
               echo "<li><a href=\"$f\">$f</a></li>" >> "${LATEST_DIR}/index.html"
             done
@@ -79,14 +79,14 @@ HTML
 
           # Create a root index.html that redirects to /latest/
           cat > "$ROOT_INDEX" <<HTML
-<!doctype html><html><head><meta charset="utf-8"><title>Lighthouse Reports</title>
-<meta http-equiv="refresh" content="0;url=latest/">
-</head><body>
-<h1>Lighthouse Reports</h1>
-<p>Redirecting to the latest report...</p>
-<p>If your browser doesn't redirect, <a href="latest/">click here</a>.</p>
-</body></html>
-HTML
+          <!doctype html><html><head><meta charset="utf-8"><title>Lighthouse Reports</title>
+          <meta http-equiv="refresh" content="0;url=latest/">
+          </head><body>
+          <h1>Lighthouse Reports</h1>
+          <p>Redirecting to the latest report...</p>
+          <p>If your browser doesn't redirect, <a href="latest/">click here</a>.</p>
+          </body></html>
+          HTML
 
       - name: Debug - show files to be deployed
         run: |
