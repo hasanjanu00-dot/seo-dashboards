@@ -2,10 +2,10 @@
   {
     "url": "https://blixa.webflow.io/",
     "isRepresentativeRun": false,
-    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/blixa_webflow_io-_-2025_10_04_10_59_23.report.html",
-    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/blixa_webflow_io-_-2025_10_04_10_59_23.report.json",
+    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/blixa_webflow_io-_-2025_10_04_13_01_17.report.html",
+    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/blixa_webflow_io-_-2025_10_04_13_01_17.report.json",
     "summary": {
-      "performance": 0.55,
+      "performance": 0.6,
       "accessibility": null,
       "best-practices": 1,
       "seo": 0.92,
@@ -15,8 +15,8 @@
   {
     "url": "https://blixa.webflow.io/",
     "isRepresentativeRun": false,
-    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/blixa_webflow_io-_-2025_10_04_10_59_36.report.html",
-    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/blixa_webflow_io-_-2025_10_04_10_59_36.report.json",
+    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/blixa_webflow_io-_-2025_10_04_13_01_34.report.html",
+    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/blixa_webflow_io-_-2025_10_04_13_01_34.report.json",
     "summary": {
       "performance": 0.94,
       "accessibility": null,
@@ -28,8 +28,8 @@
   {
     "url": "https://blixa.webflow.io/",
     "isRepresentativeRun": true,
-    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/blixa_webflow_io-_-2025_10_04_11_00_18.report.html",
-    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/blixa_webflow_io-_-2025_10_04_11_00_18.report.json",
+    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/blixa_webflow_io-_-2025_10_04_13_01_45.report.html",
+    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/blixa_webflow_io-_-2025_10_04_13_01_45.report.json",
     "summary": {
       "performance": 0.94,
       "accessibility": null,
