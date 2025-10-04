@@ -8,10 +8,15 @@ on:
 jobs:
   lhci:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          persist-credentials: true
 
       - name: Setup Node
         uses: actions/setup-node@v3
@@ -21,32 +26,76 @@ jobs:
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli@0.10.x
 
-      - name: Run Lighthouse CI autorun
+      - name: Run Lighthouse CI autorun (write to latest)
+        env:
+          TARGET_URL: https://blixa.webflow.io   # <- change this if needed
         run: |
-          # Create a timestamped folder for this run
-          TIMESTAMP=$(date +'%Y_%m_%d_%H_%M_%S')
-          REPORT_DIR="./lhci-report/$TIMESTAMP"
-          mkdir -p $REPORT_DIR
+          set -euo pipefail
 
-          # Run Lighthouse CI and output HTML report
+          REPORT_DIR="./lhci-report/latest"
+          # remove previous run and create fresh directory
+          rm -rf "$REPORT_DIR"
+          mkdir -p "$REPORT_DIR"
+
+          echo "Running lhci autorun and saving to $REPORT_DIR"
+          # Run LHCI; outputs html + json into REPORT_DIR
+          # NOTE: lhci will create multiple .html files inside REPORT_DIR
           lhci autorun \
-            --collect.url=https://blixa.webflow.io \
+            --collect.url="$TARGET_URL" \
             --upload.target=filesystem \
-            --upload.outputDir=$REPORT_DIR
+            --upload.outputDir="$REPORT_DIR"
 
-      - name: Update index.html dashboard
+      - name: Create index inside latest and root redirect
         run: |
-          DASHBOARD="./lhci-report/index.html"
-          echo "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Lighthouse Reports</title></head><body>" > $DASHBOARD
-          echo "<h1>Lighthouse Reports Dashboard</h1><ul>" >> $DASHBOARD
+          set -euo pipefail
+          LATEST_DIR="./lhci-report/latest"
+          ROOT_INDEX="./lhci-report/index.html"
 
-          # Loop through all timestamped report folders
-          for f in ./lhci-report/*/index.html; do
-            folder=$(basename $(dirname $f))
-            echo "<li><a href=\"$folder/index.html\">$folder</a></li>" >> $DASHBOARD
-          done
+          # Build index inside latest/ that redirects to the first html and lists them
+          mapfile -t htmlfiles < <(find "$LATEST_DIR" -maxdepth 1 -type f -iname '*.html' -printf '%f\n' | sort)
 
-          echo "</ul></body></html>" >> $DASHBOARD
+          if [ ${#htmlfiles[@]} -eq 0 ]; then
+            cat > "${LATEST_DIR}/index.html" <<HTML
+<!doctype html><html><head><meta charset="utf-8"><title>Latest Reports</title></head><body>
+<h1>Latest Reports</h1>
+<p>No HTML report files were found in this folder.</p>
+</body></html>
+HTML
+          else
+            first=${htmlfiles[0]}
+            cat > "${LATEST_DIR}/index.html" <<HTML
+<!doctype html><html><head><meta charset="utf-8"><title>Latest Reports</title>
+<!-- Auto-redirect to first report -->
+<meta http-equiv="refresh" content="0;url=${first}">
+</head><body>
+<h1>Latest Reports</h1>
+<ul>
+HTML
+            for f in "${htmlfiles[@]}"; do
+              echo "<li><a href=\"$f\">$f</a></li>" >> "${LATEST_DIR}/index.html"
+            done
+            echo "</ul></body></html>" >> "${LATEST_DIR}/index.html"
+          fi
+
+          # Create a root index.html that redirects to /latest/
+          cat > "$ROOT_INDEX" <<HTML
+<!doctype html><html><head><meta charset="utf-8"><title>Lighthouse Reports</title>
+<meta http-equiv="refresh" content="0;url=latest/">
+</head><body>
+<h1>Lighthouse Reports</h1>
+<p>Redirecting to the latest report...</p>
+<p>If your browser doesn't redirect, <a href="latest/">click here</a>.</p>
+</body></html>
+HTML
+
+      - name: Debug - show files to be deployed
+        run: |
+          echo "=== lhci-report tree ==="
+          ls -laR ./lhci-report || true
+          echo "=== head of latest/index.html ==="
+          sed -n '1,200p' ./lhci-report/latest/index.html || true
+          echo "=== head of root index.html ==="
+          sed -n '1,200p' ./lhci-report/index.html || true
 
       - name: Deploy reports to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
