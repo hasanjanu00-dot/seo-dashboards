@@ -35,18 +35,25 @@ jobs:
         env:
           TARGET_URL: https://flip-rabbit.webflow.io
         run: |
-          set -euxo pipefail  # added -x for detailed logs
+          set -euxo pipefail
 
           REPORT_ROOT="./lhci-report"
           LATEST_DIR="${REPORT_ROOT}/latest"
           mkdir -p "$LATEST_DIR"
 
           echo "Running Lighthouse CI for $TARGET_URL..."
-          npx lhci autorun \
-            --collect.url="$TARGET_URL" \
-            --upload.target=filesystem \
-            --upload.outputDir="$LATEST_DIR" \
-            --verbose
+
+          # Run LHCI normally
+          npx lhci collect --url="$TARGET_URL" --numberOfRuns=1 --outputPath="$LATEST_DIR/lhr.json"
+
+          # Generate an HTML report from the JSON
+          npx lhci open --path="$LATEST_DIR/lhr.json" --out="$LATEST_DIR/index.html" --headless
+
+          # Clean up JSON to keep only the HTML
+          rm -f "$LATEST_DIR/lhr.json"
+
+          echo "✅ Lighthouse HTML report generated at $LATEST_DIR/index.html"
+
 
 
       # 🏗️ Create index.html that redirects to the latest report
