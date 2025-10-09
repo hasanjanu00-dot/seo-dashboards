@@ -1,0 +1,41 @@
+[
+  {
+    "url": "https://flip-rabbit.webflow.io/",
+    "isRepresentativeRun": false,
+    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/latest.report.html",
+    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/latest.report.html",
+    "summary": {
+      "performance": 0.72,
+      "accessibility": null,
+      "best-practices": 1,
+      "seo": 0.92,
+      "pwa": 0.4
+    }
+  },
+  {
+    "url": "https://flip-rabbit.webflow.io/",
+    "isRepresentativeRun": false,
+    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/latest.report.html",
+    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/latest.report.html",
+    "summary": {
+      "performance": 0.92,
+      "accessibility": null,
+      "best-practices": 1,
+      "seo": 0.92,
+      "pwa": 0.4
+    }
+  },
+  {
+    "url": "https://flip-rabbit.webflow.io/",
+    "isRepresentativeRun": true,
+    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/latest.report.html",
+    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/latest.report.html",
+    "summary": {
+      "performance": 0.92,
+      "accessibility": null,
+      "best-practices": 1,
+      "seo": 0.92,
+      "pwa": 0.4
+    }
+  }
+]
