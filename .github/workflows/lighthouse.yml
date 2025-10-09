@@ -33,25 +33,21 @@ jobs:
       # ⚡ Run Lighthouse CI for client website (flip-rabbit)
       - name: Run Lighthouse CI autorun (Client)
         env:
-          TARGET_URL: https://flip-rabbit.webflow.io  # 👈 your client's actual website
+          TARGET_URL: https://flip-rabbit.webflow.io
         run: |
-          set -euo pipefail
+          set -euxo pipefail  # added -x for detailed logs
 
           REPORT_ROOT="./lhci-report"
           LATEST_DIR="${REPORT_ROOT}/latest"
           mkdir -p "$LATEST_DIR"
 
           echo "Running Lighthouse CI for $TARGET_URL..."
-          lhci autorun \
+          npx lhci autorun \
             --collect.url="$TARGET_URL" \
             --upload.target=filesystem \
-            --upload.outputDir="$LATEST_DIR"
+            --upload.outputDir="$LATEST_DIR" \
+            --verbose
 
-          # Rename report to always have a fixed name
-          HTML_FILE=$(find "$LATEST_DIR" -type f -name "*.html" | head -n 1)
-          if [ -n "$HTML_FILE" ]; then
-            mv "$HTML_FILE" "${LATEST_DIR}/index.html"
-          fi
 
       # 🏗️ Create index.html that redirects to the latest report
       - name: Create redirect index
