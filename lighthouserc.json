@@ -6,7 +6,7 @@
     },
     "upload": {
       "target": "filesystem",
-      "outputDir": "./lhci-report/latest",
+      "outputDir": "./lhci-report/latest"
     }
   }
 }
