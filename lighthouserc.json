@@ -1,7 +1,7 @@
 {
   "ci": {
     "collect": {
-      "url": ["https://blixa.webflow.io/"],
+      "url": ["https://flip-rabbit.webflow.io/"],
       "numberOfRuns": 3
     },
     "upload": {
