@@ -5,11 +5,16 @@ on:
     - cron: '0 */6 * * *' # every 6 hours
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pages: write
+
 jobs:
   lhci:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pages: write
 
     steps:
       - name: Checkout code
@@ -23,26 +28,34 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install Chromium (required for LHCI / Lighthouse)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser || sudo apt-get install -y chromium
+
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli@0.10.x
 
       - name: Run Lighthouse CI autorun (write to latest)
         env:
-          TARGET_URL: https://flip-rabbit.webflow.io   # 👈 your website URL
+          TARGET_URL: https://flip-rabbit.webflow.io
         run: |
           set -euo pipefail
 
           REPORT_DIR="./lhci-report/latest"
-          # remove previous run and create fresh directory
           rm -rf "$REPORT_DIR"
           mkdir -p "$REPORT_DIR"
 
           echo "Running lhci autorun and saving to $REPORT_DIR"
+
           # Run LHCI; outputs html + json into REPORT_DIR
+          # Use --chrome-flags "--no-sandbox" for CI runner
           lhci autorun \
             --collect.url="$TARGET_URL" \
+            --collect.numberOfRuns=3 \
             --upload.target=filesystem \
-            --upload.outputDir="$REPORT_DIR"
+            --upload.outputDir="$REPORT_DIR" \
+            --collect.settings.chromeFlags="--no-sandbox"
 
       - name: Create index inside latest and root redirect
         run: |
@@ -50,7 +63,6 @@ jobs:
           LATEST_DIR="./lhci-report/latest"
           ROOT_INDEX="./lhci-report/index.html"
 
-          # Build index inside latest/ that redirects to the first html and lists them
           mapfile -t htmlfiles < <(find "$LATEST_DIR" -maxdepth 1 -type f -iname '*.html' -printf '%f\n' | sort)
 
           if [ ${#htmlfiles[@]} -eq 0 ]; then
