@@ -26,72 +26,53 @@ jobs:
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli@0.10.x
 
-      - name: Run Lighthouse CI autorun (for client website)
+      # 🧹 Clean up all old reports before creating a new one
+      - name: Clean old reports
+        run: rm -rf ./lhci-report
+
+      # ⚡ Run Lighthouse CI for client website (flip-rabbit)
+      - name: Run Lighthouse CI autorun (Client)
         env:
-          TARGET_URL: https://blixa.webflow.io   # 👈 Change this to client’s actual domain when live
+          TARGET_URL: https://flip-rabbit.webflow.io  # 👈 your client's actual website
         run: |
           set -euo pipefail
 
-          TIMESTAMP=$(date +"%Y_%m_%d_%H_%M_%S")
           REPORT_ROOT="./lhci-report"
           LATEST_DIR="${REPORT_ROOT}/latest"
-          ARCHIVE_DIR="${REPORT_ROOT}/archive/${TIMESTAMP}"
+          mkdir -p "$LATEST_DIR"
 
-          # Clean up previous 'latest' directory
-          rm -rf "$LATEST_DIR"
-          mkdir -p "$LATEST_DIR" "$ARCHIVE_DIR"
-
-          echo "Running Lighthouse CI for $TARGET_URL"
+          echo "Running Lighthouse CI for $TARGET_URL..."
           lhci autorun \
             --collect.url="$TARGET_URL" \
             --upload.target=filesystem \
             --upload.outputDir="$LATEST_DIR"
 
-          echo "Saving a timestamped copy in archive/"
-          cp -r "$LATEST_DIR"/* "$ARCHIVE_DIR"/
+          # Rename report to always have a fixed name
+          HTML_FILE=$(find "$LATEST_DIR" -type f -name "*.html" | head -n 1)
+          if [ -n "$HTML_FILE" ]; then
+            mv "$HTML_FILE" "${LATEST_DIR}/index.html"
+          fi
 
-      - name: Create index files (auto-redirect + archive list)
+      # 🏗️ Create index.html that redirects to the latest report
+      - name: Create redirect index
         run: |
           set -euo pipefail
           REPORT_ROOT="./lhci-report"
-          LATEST_DIR="${REPORT_ROOT}/latest"
           ROOT_INDEX="${REPORT_ROOT}/index.html"
 
-          # Generate an index for /latest/
-          mapfile -t htmlfiles < <(find "$LATEST_DIR" -maxdepth 1 -type f -iname '*.html' -printf '%f\n' | sort)
-
-          if [ ${#htmlfiles[@]} -eq 0 ]; then
-            cat > "${LATEST_DIR}/index.html" <<HTML
-          <!doctype html><html><head><meta charset="utf-8"><title>No Reports</title></head><body>
-          <h1>No Lighthouse Reports Found</h1>
-          </body></html>
-          HTML
-          else
-            first=${htmlfiles[0]}
-            cat > "${LATEST_DIR}/index.html" <<HTML
-          <!doctype html><html><head><meta charset="utf-8"><title>Latest Lighthouse Report</title>
-          <meta http-equiv="refresh" content="0;url=${first}">
-          </head><body>
-          <h1>Redirecting to the Latest Lighthouse Report...</h1>
-          <p>If not redirected automatically, <a href="${first}">click here</a>.</p>
-          </body></html>
-          HTML
-          fi
-
-          # Create a root index linking to latest and archives
           cat > "$ROOT_INDEX" <<HTML
-          <!doctype html><html><head><meta charset="utf-8"><title>Lighthouse Reports</title></head><body>
-          <h1>Lighthouse Reports</h1>
-          <ul>
-            <li><a href="latest/">View Latest Report</a></li>
-            <li><a href="archive/">View Archived Reports</a></li>
-          </ul>
+          <!doctype html><html><head><meta charset="utf-8">
+          <meta http-equiv="refresh" content="0;url=latest/">
+          <title>Lighthouse Report</title></head>
+          <body>
+            <h1>Redirecting to the latest Lighthouse report...</h1>
+            <p>If not redirected, <a href="latest/">click here</a>.</p>
           </body></html>
           HTML
 
       - name: Debug (optional)
         run: |
-          echo "=== Report Folder Structure ==="
+          echo "=== Final Folder Structure ==="
           ls -laR ./lhci-report || true
 
       - name: Deploy to GitHub Pages
