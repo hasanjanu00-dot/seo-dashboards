@@ -2,10 +2,10 @@
   {
     "url": "https://flip-rabbit.webflow.io/",
     "isRepresentativeRun": false,
-    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/latest.report.html",
-    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/latest.report.html",
+    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/index.html",
+    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/index.html",
     "summary": {
-      "performance": 0.72,
+      "performance": 0.84,
       "accessibility": null,
       "best-practices": 1,
       "seo": 0.92,
@@ -15,8 +15,8 @@
   {
     "url": "https://flip-rabbit.webflow.io/",
     "isRepresentativeRun": false,
-    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/latest.report.html",
-    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/latest.report.html",
+    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/index.html",
+    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/index.html",
     "summary": {
       "performance": 0.92,
       "accessibility": null,
@@ -28,8 +28,8 @@
   {
     "url": "https://flip-rabbit.webflow.io/",
     "isRepresentativeRun": true,
-    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/latest.report.html",
-    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/latest.report.html",
+    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/index.html",
+    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/index.html",
     "summary": {
       "performance": 0.92,
       "accessibility": null,
