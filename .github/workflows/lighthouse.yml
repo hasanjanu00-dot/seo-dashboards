@@ -43,14 +43,19 @@ jobs:
 
           echo "Running Lighthouse CI for $TARGET_URL..."
 
-          # Run LHCI normally
-          npx lhci collect --url="$TARGET_URL" --numberOfRuns=1 --outputPath="$LATEST_DIR/lhr.json"
+          # Run LHCI autorun and store all outputs (HTML + JSON)
+          npx lhci autorun \
+            --collect.url="$TARGET_URL" \
+            --upload.target=filesystem \
+            --upload.outputDir="$LATEST_DIR"
 
-          # Generate an HTML report from the JSON
-          npx lhci open --path="$LATEST_DIR/lhr.json" --out="$LATEST_DIR/index.html" --headless
-
-          # Clean up JSON to keep only the HTML
-          rm -f "$LATEST_DIR/lhr.json"
+          # Rename the generated HTML to index.html (permanent link)
+          HTML_FILE=$(find "$LATEST_DIR" -type f -name "*.html" | head -n 1)
+          if [ -n "$HTML_FILE" ]; then
+            mv "$HTML_FILE" "${LATEST_DIR}/index.html"
+          else
+            echo "❌ No HTML report found. Check LHCI output above." && exit 1
+          fi
 
           echo "✅ Lighthouse HTML report generated at $LATEST_DIR/index.html"
 
