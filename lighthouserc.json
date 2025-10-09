@@ -6,8 +6,8 @@
     },
     "upload": {
       "target": "filesystem",
-      "outputDir": "./lhci_reports",
-      "reportFilenamePattern": "latest.report.html"
+      "outputDir": "./lhci-report/latest",
+      "reportFilenamePattern": "index.html"
     }
   }
 }
