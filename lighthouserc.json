@@ -7,7 +7,6 @@
     "upload": {
       "target": "filesystem",
       "outputDir": "./lhci-report/latest",
-      "reportFilenamePattern": "index.html"
     }
   }
 }
