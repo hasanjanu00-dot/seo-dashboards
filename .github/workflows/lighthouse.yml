@@ -1,8 +1,8 @@
-name: Lighthouse CI (Client Reports)
+name: Lighthouse CI
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # every 6 hours
+    - cron: '0 */6 * * *' # every 6 hours
   workflow_dispatch:
 
 jobs:
@@ -26,64 +26,77 @@ jobs:
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli@0.10.x
 
-      # 🧹 Clean up all old reports before creating a new one
-      - name: Clean old reports
-        run: rm -rf ./lhci-report
-
-      # ⚡ Run Lighthouse CI for client website (flip-rabbit)
-      - name: Run Lighthouse CI autorun (Client)
+      - name: Run Lighthouse CI autorun (write to latest)
         env:
-          TARGET_URL: https://flip-rabbit.webflow.io
-        run: |
-          set -euxo pipefail
-
-          REPORT_ROOT="./lhci-report"
-          LATEST_DIR="${REPORT_ROOT}/latest"
-          mkdir -p "$LATEST_DIR"
-
-          echo "Running Lighthouse CI for $TARGET_URL..."
-
-          # Run LHCI autorun and store all outputs (HTML + JSON)
-          npx lhci autorun \
-            --collect.url="$TARGET_URL" \
-            --upload.target=filesystem \
-            --upload.outputDir="$LATEST_DIR"
-
-          # Rename the generated HTML to index.html (permanent link)
-          HTML_FILE=$(find "$LATEST_DIR" -type f -name "*.html" | head -n 1)
-          if [ -n "$HTML_FILE" ]; then
-            mv "$HTML_FILE" "${LATEST_DIR}/index.html"
-          else
-            echo "❌ No HTML report found. Check LHCI output above." && exit 1
-          fi
-
-          echo "✅ Lighthouse HTML report generated at $LATEST_DIR/index.html"
-
-
-
-      # 🏗️ Create index.html that redirects to the latest report
-      - name: Create redirect index
+          TARGET_URL: https://flip-rabbit.webflow.io   # 👈 your website URL
         run: |
           set -euo pipefail
-          REPORT_ROOT="./lhci-report"
-          ROOT_INDEX="${REPORT_ROOT}/index.html"
 
+          REPORT_DIR="./lhci-report/latest"
+          # remove previous run and create fresh directory
+          rm -rf "$REPORT_DIR"
+          mkdir -p "$REPORT_DIR"
+
+          echo "Running lhci autorun and saving to $REPORT_DIR"
+          # Run LHCI; outputs html + json into REPORT_DIR
+          lhci autorun \
+            --collect.url="$TARGET_URL" \
+            --upload.target=filesystem \
+            --upload.outputDir="$REPORT_DIR"
+
+      - name: Create index inside latest and root redirect
+        run: |
+          set -euo pipefail
+          LATEST_DIR="./lhci-report/latest"
+          ROOT_INDEX="./lhci-report/index.html"
+
+          # Build index inside latest/ that redirects to the first html and lists them
+          mapfile -t htmlfiles < <(find "$LATEST_DIR" -maxdepth 1 -type f -iname '*.html' -printf '%f\n' | sort)
+
+          if [ ${#htmlfiles[@]} -eq 0 ]; then
+            cat > "${LATEST_DIR}/index.html" <<HTML
+          <!doctype html><html><head><meta charset="utf-8"><title>Latest Reports</title></head><body>
+          <h1>Latest Reports</h1>
+          <p>No HTML report files were found in this folder.</p>
+          </body></html>
+          HTML
+          else
+            first=${htmlfiles[0]}
+            cat > "${LATEST_DIR}/index.html" <<HTML
+          <!doctype html><html><head><meta charset="utf-8"><title>Latest Reports</title>
+          <!-- Auto-redirect to first report -->
+          <meta http-equiv="refresh" content="0;url=${first}">
+          </head><body>
+          <h1>Latest Reports</h1>
+          <ul>
+          HTML
+            for f in "${htmlfiles[@]}"; do
+              echo "<li><a href=\"$f\">$f</a></li>" >> "${LATEST_DIR}/index.html"
+            done
+            echo "</ul></body></html>" >> "${LATEST_DIR}/index.html"
+          fi
+
+          # Create a root index.html that redirects to /latest/
           cat > "$ROOT_INDEX" <<HTML
-          <!doctype html><html><head><meta charset="utf-8">
+          <!doctype html><html><head><meta charset="utf-8"><title>Lighthouse Reports</title>
           <meta http-equiv="refresh" content="0;url=latest/">
-          <title>Lighthouse Report</title></head>
-          <body>
-            <h1>Redirecting to the latest Lighthouse report...</h1>
-            <p>If not redirected, <a href="latest/">click here</a>.</p>
+          </head><body>
+          <h1>Lighthouse Reports</h1>
+          <p>Redirecting to the latest report...</p>
+          <p>If your browser doesn't redirect, <a href="latest/">click here</a>.</p>
           </body></html>
           HTML
 
-      - name: Debug (optional)
+      - name: Debug - show files to be deployed
         run: |
-          echo "=== Final Folder Structure ==="
+          echo "=== lhci-report tree ==="
           ls -laR ./lhci-report || true
+          echo "=== head of latest/index.html ==="
+          sed -n '1,200p' ./lhci-report/latest/index.html || true
+          echo "=== head of root index.html ==="
+          sed -n '1,200p' ./lhci-report/index.html || true
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy reports to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
