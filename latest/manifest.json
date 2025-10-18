@@ -2,10 +2,10 @@
   {
     "url": "https://flip-rabbit.webflow.io/",
     "isRepresentativeRun": false,
-    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/flip_rabbit_webflow_io-_-2025_10_17_18_45_27.report.html",
-    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/flip_rabbit_webflow_io-_-2025_10_17_18_45_27.report.json",
+    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/flip_rabbit_webflow_io-_-2025_10_18_03_03_58.report.html",
+    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/flip_rabbit_webflow_io-_-2025_10_18_03_03_58.report.json",
     "summary": {
-      "performance": 0.85,
+      "performance": 0.68,
       "accessibility": null,
       "best-practices": 1,
       "seo": 0.92,
@@ -15,8 +15,8 @@
   {
     "url": "https://flip-rabbit.webflow.io/",
     "isRepresentativeRun": false,
-    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/flip_rabbit_webflow_io-_-2025_10_17_18_45_39.report.html",
-    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/flip_rabbit_webflow_io-_-2025_10_17_18_45_39.report.json",
+    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/flip_rabbit_webflow_io-_-2025_10_18_03_04_37.report.html",
+    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/flip_rabbit_webflow_io-_-2025_10_18_03_04_37.report.json",
     "summary": {
       "performance": 0.91,
       "accessibility": null,
@@ -28,10 +28,10 @@
   {
     "url": "https://flip-rabbit.webflow.io/",
     "isRepresentativeRun": true,
-    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/flip_rabbit_webflow_io-_-2025_10_17_18_45_50.report.html",
-    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/flip_rabbit_webflow_io-_-2025_10_17_18_45_50.report.json",
+    "htmlPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/flip_rabbit_webflow_io-_-2025_10_18_03_04_47.report.html",
+    "jsonPath": "/home/runner/work/seo-dashboards/seo-dashboards/lhci-report/latest/flip_rabbit_webflow_io-_-2025_10_18_03_04_47.report.json",
     "summary": {
-      "performance": 0.9,
+      "performance": 0.91,
       "accessibility": null,
       "best-practices": 1,
       "seo": 0.92,
